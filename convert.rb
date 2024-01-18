@@ -1,9 +1,7 @@
 require 'rubygems'
 require 'nokogiri'
 require 'rmagick'
-require 'prawn' # Not the base! It doesn't have image tables! Use:
-# gem install specific_install
-# gem specific_install https://github.com/prawnpdf/prawn.git
+require 'prawn'
 
 # Convenience function used to wrap lines before writing them with RMagick
 def word_wrap(text, columns = 15)
@@ -104,8 +102,8 @@ def texttocards
   whitecounter = -1
 
   whitetitles.each do |wht|
-    img = Magick::Image.new(750,1050){
-      self.background_color = 'white'
+    img = Magick::Image.new(750,1050){ |options|
+      options.background_color = 'white'
     }
 
     gc = Magick::Draw.new
@@ -113,23 +111,23 @@ def texttocards
     offset = 0
 
     word_wrap(wht).each_line do |row|
-      gc.annotate(img, 600, 900, 75, (offset += 85), row) {
-        self.font_family = 'Arial'
-        #self.fill = 'black'
-        self.stroke = 'black'
-        self.pointsize = 64
-        self.font_weight = Magick::BoldWeight
-        self.gravity = Magick::NorthWestGravity
+      gc.annotate(img, 600, 900, 75, (offset += 85), row) { |options|
+        options.font_family = 'Arial'
+        #options.fill = 'black'
+        options.stroke = 'black'
+        options.pointsize = 64
+        options.font_weight = Magick::BoldWeight
+        options.gravity = Magick::NorthWestGravity
       }
     end
 
-    gc.annotate(img, 600, 1000, 150, 0, "Hackers Against Humanity") {
-      self.font_family = 'Arial'
-      #self.fill = 'black'
-      self.stroke = 'black'
-      self.pointsize = 24
-      self.font_weight = Magick::BoldWeight
-      self.gravity = Magick::SouthWestGravity
+    gc.annotate(img, 600, 1000, 150, 0, "Hackers Against Humanity") { |options|
+      options.font_family = 'Arial'
+      #options.fill = 'black'
+      options.stroke = 'black'
+      options.pointsize = 24
+      options.font_weight = Magick::BoldWeight
+      options.gravity = Magick::SouthWestGravity
     }
 
     logo = Magick::Image::read("cahhacker.png")[0]
@@ -143,8 +141,8 @@ def texttocards
   blackcounter = -1
 
   blacktitles.each do |blk|
-    img = Magick::Image.new(750,1050){
-      self.background_color = 'black'
+    img = Magick::Image.new(750,1050){ |options|
+      options.background_color = 'black'
     }
 
     gc = Magick::Draw.new
@@ -152,23 +150,23 @@ def texttocards
     offset = 0
 
     word_wrap(blk).each_line do |row|
-      gc.annotate(img, 600, 900, 75, (offset += 85), row) {
-        self.font_family = 'Arial'
-        self.fill = 'white'
-        self.stroke = 'white'
-        self.pointsize = 64
-        self.font_weight = Magick::BoldWeight
-        self.gravity = Magick::NorthWestGravity
+      gc.annotate(img, 600, 900, 75, (offset += 85), row) { |options|
+        options.font_family = 'Arial'
+        options.fill = 'white'
+        options.stroke = 'white'
+        options.pointsize = 64
+        options.font_weight = Magick::BoldWeight
+        options.gravity = Magick::NorthWestGravity
       }
     end
 
-    gc.annotate(img, 600, 1000, 150, 0, "Hackers Against Humanity") {
-      self.font_family = 'Arial'
-      self.fill = 'white'
-      self.stroke = 'white'
-      self.pointsize = 24
-      self.font_weight = Magick::BoldWeight
-      self.gravity = Magick::SouthWestGravity
+    gc.annotate(img, 600, 1000, 150, 0, "Hackers Against Humanity") { |options|
+      options.font_family = 'Arial'
+      options.fill = 'white'
+      options.stroke = 'white'
+      options.pointsize = 24
+      options.font_weight = Magick::BoldWeight
+      options.gravity = Magick::SouthWestGravity
     }
 
     logo = Magick::Image::read("cahhacker.png")[0]
@@ -202,10 +200,12 @@ def cardstopdf
   # White: 0-277
   # Black: 0-80
 
-  blackcounter = 80
-  whitecounter = 277
+  #blackcounter = 80
+  #whitecounter = 277
+  blackcounter = 17
+  whitecounter = 17
 
-  Prawn::Document.generate('pdf/blackcards.pdf'){
+  Prawn::Document.generate('pdf/blackcards.pdf', page_size: 'A4'){
     width = bounds.right - bounds.left
     height = bounds.top - bounds.bottom
     cardw = width / 3.0
@@ -220,7 +220,7 @@ def cardstopdf
       fill_rectangle bounds.top_left, width, height
   
       # Go to next page.
-      start_new_page
+      start_new_page(size: 'A4')
     
       puts "Now drawing Black Card images #{n}-#{n+8}"
     
@@ -269,13 +269,13 @@ def cardstopdf
       puts "Black Cards #{n}-#{n+8} of #{blackcounter} written"
     
       if n+9 < blackcounter
-        start_new_page
+        start_new_page(size: 'A4')
       end
     
     end
   }
   
-  Prawn::Document.generate('pdf/whitecards.pdf'){
+  Prawn::Document.generate('pdf/whitecards.pdf', page_size: 'A4'){
     width = bounds.right - bounds.left
     height = bounds.top - bounds.bottom
     cardw = width / 3.0
@@ -329,7 +329,7 @@ def cardstopdf
       puts "White Cards #{n}-#{n+8} of #{whitecounter} written"
     
       if n+9 < whitecounter
-        start_new_page
+        start_new_page(size: 'A4')
       end
     
     end
